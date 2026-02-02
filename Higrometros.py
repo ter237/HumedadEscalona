@@ -104,6 +104,12 @@ df["Margen (ºC)"] = df["Temp Int (ºC)"] - df["Punto Rocío(ºC)"]
 df.dropna(subset=["Temp Ext (ºC)"], how='any', inplace=True)
 
 
+
+
+
+'''
+
+
 ###############################################################################################################################
 
 # Expected column names (exactly as provided). If your CSV uses slightly different names, adjust here.
@@ -471,13 +477,117 @@ out_file = file_path.with_suffix(".png")
 plt.savefig(today_str + "_" + "HumedadAbs Int Ext.png", dpi=150)
 print(f"Saved plot to {out_file}")
 
+'''
 
 
+
+
+
+
+
+
+plt.style.use("dark_background")
+
+fig, axs = plt.subplots(3, 2, figsize=(18, 14), sharex=True)
+axs = axs.flatten()  # Facilita el acceso: axs[0]..axs[5]
+
+colors = ["tab:blue", "tab:orange", "tab:red"]
+
+# --------------------------------------------------
+# 1️⃣ Temp Int / Punto Rocío / Margen
+# --------------------------------------------------
+ax = axs[0]
+
+ax.plot(df.index, df["Temp Int (ºC)"], label="Temp Int (ºC)", color=colors[0])
+ax.plot(df.index, df["Punto Rocío(ºC)"], label="Punto Rocío(ºC)", color=colors[1])
+
+ax2 = ax.twinx()
+ax2.plot(df.index, df["Margen (ºC)"], label="Margen (ºC)", color=colors[2], linestyle="--")
+
+ax.set_title("Temp Interior vs Punto de Rocío")
+ax.set_ylabel("ºC")
+ax2.set_ylabel("Margen (ºC)")
+
+lines, labels = ax.get_legend_handles_labels()
+l2, lab2 = ax2.get_legend_handles_labels()
+ax.legend(lines + l2, labels + lab2, fontsize="small")
+
+# --------------------------------------------------
+# 2️⃣ Temp Exterior vs Interior
+# --------------------------------------------------
+ax = axs[1]
+
+ax.plot(df.index, df["Temp Int (ºC)"], label="Temp Int (ºC)", color=colors[0])
+ax.plot(df.index, df["Temp Ext (ºC)"], label="Temp Ext (ºC)", color=colors[1])
+
+ax.set_title("Temperatura Exterior vs Interior")
+ax.set_ylabel("ºC")
+ax.legend(fontsize="small")
+
+# --------------------------------------------------
+# 4️⃣ Margen (Temp Int - Punto Rocío)
+# --------------------------------------------------
+ax = axs[2]
+
+ax.plot(df.index, df["Margen (ºC)"], label="Margen (ºC)", color=colors[2])
+ax.axhline(0, color="gray", linestyle=":", linewidth=1)
+
+ax.set_title("Margen respecto al Punto de Rocío")
+ax.set_ylabel("ºC")
+ax.legend(fontsize="small")
+
+# --------------------------------------------------
+# 3️⃣ Temperaturas medias diarias
+# --------------------------------------------------
+ax = axs[3]
+
+daily_ext = df['Temp Ext (ºC)'].resample('D').mean()
+daily_int = df['Temp Int (ºC)'].resample('D').mean()
+
+ax.plot(daily_ext.index, daily_ext, label="Temp Ext media diaria", linestyle="--", color="red")
+ax.plot(daily_int.index, daily_int, label="Temp Int media diaria", linestyle="--", color="blue")
+
+ax.set_title("Temperaturas medias diarias")
+ax.set_ylabel("ºC")
+ax.legend(fontsize="small")
+
+
+
+# --------------------------------------------------
+# 5️⃣ Humedad relativa Interior vs Exterior
+# --------------------------------------------------
+ax = axs[4]
+
+ax.plot(df.index, df["Relative_Humidity(%)"], label="HR Interior", color=colors[0])
+ax.plot(df.index, df["Relative_Humidity(%)_Exterior"], label="HR Exterior", color=colors[1])
+
+ax.set_title("Humedad Relativa Interior vs Exterior")
+ax.set_ylabel("%")
+ax.legend(fontsize="small")
+
+# --------------------------------------------------
+# 6️⃣ Humedad absoluta Interior vs Exterior
+# --------------------------------------------------
+ax = axs[5]
+
+ax.plot(df.index, df["Absolute_Humidity(g/m³)"], label="HA Interior", color=colors[0])
+ax.plot(df.index, df["Absolute_Humidity(g/m³)_Exterior"], label="HA Exterior", color=colors[1])
+
+ax.set_title("Humedad Absoluta Interior vs Exterior")
+ax.set_ylabel("g/m³")
+ax.legend(fontsize="small")
+
+# --------------------------------------------------
+# Ajustes finales
+# --------------------------------------------------
+for ax in axs:
+    ax.set_xlabel("Timestamp")
+    #ax.ti
+
+plt.savefig(today_str + " " + "Gráficas Humedad Escalona.png", dpi=150)
 
 
 plt.show()
-
-
 
 
 
